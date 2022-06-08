@@ -1,0 +1,100 @@
+---
+title: "Devoir final 1"
+author: "Hadley Kervens RENE"
+date: '2022-06-08'
+output: word_document
+---
+
+
+#introduction
+Ce rapport nous montre un travail creer avec Rmarkdon,on a travaille sur le fichier des agregats monetaires.Ensuite,on a pu extraire des variables choisies pour continuer.'
+
+#Developpement
+Dans le travail,on a creer une sserie temporelle apres avoir choisis les agregats M1,M2 et M3 du fichier.L'agregat M1 represente les pieces et billets en circulation,M2 pour M1 plus les depots sur livrets et les credits a court terme et M3 pou M2 plus divers placements monetaires.ensuite avec les graphes trouver pour la serie temporelle,on a pu voir que les 3 varaiables sont stationnaire a partir de 1980 cela que ce soit en difference premiere ou deuxieme.Et finalement on a eu la causalite entre les 3 variables ainsi que la regression lineaire.
+
+#Conclusion
+C'est ainsi que s'est derole notre travail sur les agregats M1,M2 et M3 du fichier des agregats de la BRH
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=F}
+library(tidyverse)
+library(tseries)
+library(readxl)
+library(lmtest)
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#Choix de 3 variables#
+library(tidyverse)
+choix3=agregatsmon%>%select(Date,['M1...2'],['M2...3'],['M3...4'])
+print(choix3)
+
+
+#serie temporelle3
+library(tseries)
+serietemp=ts(data = choix3[,1], start = c(1980,09), frequency = 12)
+```
+
+```{r pressure, echo=FALSE}
+
+#Verifions le sens de la causalite,au sens de Granger pour M1 et M2#
+library(lmtest)
+grangertest(`M1...2`~`M2...3`,data = agregatsmon, order = 1)
+grangertest(`M1...2`,`M2...3`,data = agregatsmon, order = 2)
+
+
+#sens de la causalite,au sens de Granger pour M2 et M3#
+library(lmtest)
+grangertest(`M2...3`,`M3...4`,data = agregatsmon, order = 1)
+grangertest(`M2...3`,`M3...4`,data = agregatsmon, order = 2)
+
+
+#sens de la causalite,au sens de Granger pour M1 et M3
+library(lmtest)
+grangertest(`M1...2`,`M3...4`,data = agregatsmon, order = 1)
+grangertest(`M1...2`,`M3...4`,data = agregatsmon, order = 2)
+
+
+#regression lineaire3
+regrelin_lm=lm(`M1...2`~`M2...3`~`M3...4`)
+
+```
+
+plot(pressure)
+#Graphique#
+library(itsmr)
+plotc(serietemp)
+
+
+#verifions si elles sont stationnaires en difference premiere#
+stationnaire_PRD=diff(serietemp, differences = 1)
+plot(stationnaire_PRD)
+
+
+#Verifions si elles sont stationnaires en difference deuxieme#
+stationnaire_DED=diff(serietemp, differences = 2)
+plot(stationnaire_DED)
+```
+
+
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
